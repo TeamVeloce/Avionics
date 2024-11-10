@@ -1,0 +1,54 @@
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BMP3XX.h>
+#include <Math.h>
+
+// Create an instance of the BMP388 sensor
+Adafruit_BMP3XX bmp;
+double Pi=101325;
+double R=8.314;
+double M=0.029;
+double g=9.8;
+double Po,T,h;
+
+void setup() {
+  Serial.begin(115200);
+  Wire.begin();
+
+
+  // Initialize the BMP388 sensor
+  if (!bmp.begin_I2C()) {   // I2C connection to BMP388
+    Serial.println("Could not find a valid BMP388 sensor, check wiring!");
+    while (1);
+  }
+
+  // Set the pressure measurement mode (normal mode)
+  bmp.setTemperatureOversampling(BMP3_OVERSAMPLING_8X);
+  bmp.setPressureOversampling(BMP3_OVERSAMPLING_4X);
+  bmp.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_3);
+  bmp.setOutputDataRate(BMP3_ODR_50_HZ);
+
+  
+}
+
+
+void loop() {
+  // Read pressure and temperature data from the sensor
+  if (!bmp.performReading()) {
+    Serial.println("Failed to perform reading :(");
+    return;
+  }
+ // Print the pressure data
+  Serial.println("Pressure");
+  Po=bmp.pressure;
+  Serial.println(Po);
+  Serial.println("Temperature");
+  T=bmp.temperature;
+  Serial.println(T);
+  Serial.println("Height");
+  h=((R*(T+273.15))/(M*g))*(log(Pi/Po));
+  Serial.println(h);
+
+  
+  delay(500);  // Wait for a second between readings
+}
